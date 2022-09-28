@@ -101,10 +101,10 @@ namespace booking
 std::ostream& operator<<(std::ostream& os, const booking::BookingEntry& entry);
 
 // Check if the file is empty to determine if 'sep=(char)' line will be inserted. 
-void emptyFileCheck(std::fstream& file);
+void emptyFileRoutine(std::fstream& file);
 
 
 void addBookingEntry();
 
 
-void removeBookingEntry();
+void removeBookingEntry(std::fstream& file, int& lineToRemove);

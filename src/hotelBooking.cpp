@@ -138,17 +138,26 @@ std::ostream& operator<<(std::ostream& os, const booking::BookingEntry& entry)
     return os;
 };
 
-void emptyFileCheck(std::fstream& file)
+void emptyFileRoutine(std::fstream& file)
 {
     file.seekg(0,std::ios::end);
     if(file.tellg() == 0)
     {
-       file << "sep=" << csvSeparator << newLineOp;
-       file << "ID"  << csvSeparator << "Customer information" << csvSeparator << "Room details" << csvSeparator << "Payment status" << csvSeparator << "Time to stay" << newLineOp;
-    }    
+        file << "sep=" << csvSeparator << newLineOp;
+        file << "ID"  << csvSeparator << "Customer information" << csvSeparator << "Room details" << csvSeparator << "Payment status" << csvSeparator << "Time to stay" << newLineOp;
+        std::ofstream idValue("../assets/currentID.txt");
+        idValue << 1;
+    }
 }
 
 void addBookingEntry()
 {
+    
+}
+
+void removeBookingEntry(std::fstream& file, int& lineToRemove)
+{
+    std::string container;
+    file.open("..\\assets\\bookings.csv", std::ios::app);
     
 }

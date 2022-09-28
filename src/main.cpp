@@ -8,7 +8,7 @@ int main()
     std::fstream file("..\\assets\\bookings.csv",std::ios::app);
 
 
-    emptyFileCheck(file);
+    emptyFileRoutine(file);
 
     //std::map<std::string, int> options;
 
