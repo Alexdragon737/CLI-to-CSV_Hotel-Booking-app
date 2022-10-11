@@ -33,7 +33,4 @@
 
 
 # Local assets
-*.csv
-*.xls
-*.xlsx
-*.txt
+assets/*.*
