@@ -4,16 +4,20 @@
 #include<fstream>
 #include<ctime>
 #include<map>
+#include<vector>
+#include<sstream>
 
 namespace booking
 {
     /** 
      * Depending on the software used for viewing CSV files (Excel, LibreOffice and others) the separator might be set to ';'.
      * 
-     * The separator can be declared at the beginning of the CSV file in order to avoid changing settings and creating compatibility
-     * problems with XLS, XLSX and other formats.
+     * The separator can be declared at the beginning of the CSV file in order to avoid changing settings
+     * and creating compatibility problems with XLS, XLSX and other formats.
      */
     const char csvSeparator = ',';
+
+    // Expands to "\n"
     const char newLineOp = '\n';
 
     class Customer{
@@ -51,8 +55,9 @@ namespace booking
              * @param peopleNumber 
              * @param roomNumber 
              * @param preferAC 
+
              */
-            Room(int& peopleNumber, int& roomNumber, bool& preferAC);
+            Room(int& peopleNumber, bool& preferAC);
     };
 
     class PaymentStatus
@@ -67,44 +72,56 @@ namespace booking
              */
             PaymentStatus();
 
-            PaymentStatus(int roomPrice, int paidAmount);
+            PaymentStatus(int& roomPrice, int& paidAmount);
     };
 
     class Period{
         public:
-            std::tm* timeStart;
-            std::tm* timeEnd;
+            std::string startDate, endDate;
 
             Period();
 
-            Period(int& startDay, int& startMonth, int& startYear, int& startHour, int& startMinute,
-                    int& daysToStay);
+            Period(std::string& startDate, int& daysToStay);
     };
-
-    class BookingEntry{
-        public:
-            int entryID;
-            Customer cust;
-            Room room;
-            PaymentStatus pay;
-            Period period;
-
-            // Construct a new BookingEntry object with default values.
-            BookingEntry();
-
-            BookingEntry(Customer& cust, Room& room, PaymentStatus& PaymentStatus, Period& period);
-    };
-
+    /**
+    * @brief Check if the file is empty. If true, then the separator line is appended to the file and reset the currentID.
+    * 
+    * @param file The file that is checked.
+    * 
+    */
+    void emptyFileRoutine(std::fstream& file);
+    
+    // Add one or more entries to the Bookings CSV file.
+    void addBookingEntry();
+    
+    // Remove one or more entries from the Bookings CSV file.
+    void removeBookingEntry(std::fstream& file, int& lineToRemove);
+    
+    // Explicitly initialize the ID by reading it from the currentID.txt file.
+    int initID();
+    
+    // Update the ID when necessary by rewriting the currentID.txt file.
+    void updateID();
+    
 };
 
-// Operator<< overloading for BookingEntry objects. Avoid refactoring unless it's absolutely necessary.
-std::ostream& operator<<(std::ostream& os, const booking::BookingEntry& entry);
+// Operator<< overloading for Customer objects
+std::ostream& operator<<(std::ostream& os, const booking::Customer& cust);
 
-// Check if the file is empty to determine if 'sep=(char)' line will be inserted. 
-void emptyFileRoutine(std::fstream& file);
+// Operator<< overloading for Room objects
+std::ostream& operator<<(std::ostream& os, const booking::Room& room);
 
+// Operator<< overloading for PaymentStatus objects
+std::ostream& operator<<(std::ostream& os, const booking::PaymentStatus& pay);
 
-void addBookingEntry();
+// Operator<< overloading for Period objects
+std::ostream& operator<<(std::ostream& os, const booking::Period& period);
 
+/*
+    "Clear" the screen by inserting 100 lines of '\\n'.
 
-void removeBookingEntry(std::fstream& file, int& lineToRemove);
+    Even though it's not the most elegant solution, clearing the actual console is a challenge
+    considering that most methods are either deprecated (e.g. clrscr() from conio.h) or unsafe
+    (e.g. system("cls") from stdlib.h).
+*/
+void clearScreen();

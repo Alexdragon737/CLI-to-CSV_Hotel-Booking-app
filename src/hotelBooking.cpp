@@ -1,44 +1,54 @@
 #include "../include/hotelBooking.h"
 
-using namespace booking;
 
-BookingEntry::BookingEntry()
+std::ostream& operator<<(std::ostream& os, const booking::Customer& cust)
 {
-    srand(time(NULL));
-    entryID = rand()%1000000;
-    cust = Customer();
-    room = Room();
-    pay = PaymentStatus();
-    period = Period();
+    os << '"' << "Name: " << cust.name << booking::newLineOp << "Address: " << cust.address << booking::newLineOp << "Phone number: " << cust.phoneNumber << booking::newLineOp << '"' << booking::csvSeparator;
+    return os;
 }
 
-BookingEntry::BookingEntry(Customer& cust, Room& room, PaymentStatus& pay, Period& period)
+std::ostream& operator<<(std::ostream& os, const booking::Room& room)
 {
-    std::fstream currentIDfile("../assets/currentID.txt");
-    currentIDfile >> entryID;
-    currentIDfile << entryID++;
-
-    this->cust = Customer(cust.name, cust.address, cust.phoneNumber);
-    this->room = Room(room.peopleNumber, room.roomNumber, room.preferAC);
-    this->pay = PaymentStatus(room.price, pay.paidAmount);
-    this->period = Period();
+    os << '"' << "Number of people: " <<room.peopleNumber << booking::newLineOp << "Prefer AC:";
+    if(room.preferAC == true)
+        os << "Yes";
+    else os << "No";
+    os << booking::newLineOp << "Room price: " <<room.price << booking::newLineOp << "Room number: " <<room.roomNumber << '"' << booking::csvSeparator;
+    return os;
 }
 
-Customer::Customer()
+std::ostream& operator<<(std::ostream& os, const booking::PaymentStatus& pay)
+{
+    os << '"';
+    if(pay.fullyPaid == true)
+        os << "Yes";
+    else os << "No";
+    os << "Paid amount: " << pay.paidAmount << booking::newLineOp << "Left amount: " << pay.leftAmount << booking::newLineOp << '"' << booking::csvSeparator;
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const booking::Period& period)
+{
+    os << '"' << "From: " << period.startDate << booking::newLineOp;
+    os << "To: " << period.endDate << '"' << booking::csvSeparator;
+    return os;
+}
+
+booking::Customer::Customer()
 {
     name = "N/A";
     address = "N/A";
     phoneNumber = "N/A";
 }
 
-Customer::Customer(std::string& name, std::string& address, std::string& phoneNumber)
+booking::Customer::Customer(std::string& name, std::string& address, std::string& phoneNumber)
 {
     this->name = name;
     this->address = address;
     this->phoneNumber = phoneNumber;
 }
 
-Room::Room()
+booking::Room::Room()
 {
     peopleNumber = 0;
     roomNumber = 0;
@@ -46,118 +56,189 @@ Room::Room()
     preferAC = false;
 }
 
-Room::Room(int& peopleNumber, int& roomNumber, bool& preferAC)
+booking::Room::Room(int& peopleNumber, bool& preferAC)
 {
     this->peopleNumber = peopleNumber;
-    this->roomNumber = roomNumber;
+    this->roomNumber = rand()%250+1;
     this->preferAC = preferAC;
+    this->price = 100*peopleNumber + 50*(int)preferAC;
 }
 
-PaymentStatus::PaymentStatus()
+booking::PaymentStatus::PaymentStatus()
 {
     fullyPaid = false;
     paidAmount = 0;
     leftAmount= 0;
 }
 
-PaymentStatus::PaymentStatus(int price, int paidAmount)
+booking::PaymentStatus::PaymentStatus(int& price, int& paidAmount)
 {
-    if(price == paidAmount)
-    {
-        leftAmount = 0;
-        fullyPaid = true;
-    }    
-    else
-    {
-        leftAmount = price-paidAmount;
-        fullyPaid = false;
-    } 
+    this->paidAmount = paidAmount;
+    this->leftAmount = price - this->paidAmount;
+    if(this->leftAmount != 0)
+        this->fullyPaid = false;
+    else this->fullyPaid = true;
 }
 
-Period::Period()
+booking::Period::Period()
 {
-    time_t now = std::time(0);
-    timeStart = std::localtime(&now);
-    timeEnd = std::localtime(&now);
+    this->startDate = "1/1/1970";
+    this->endDate = "2/1/1970";
 }
 
-Period::Period(int& startDay, int& startMonth, int& startYear, int& startHour, int& startMinute, int& daysToStay)
+booking::Period::Period(std::string& startDate, int& daysToStay)
 {
-    this->timeStart->tm_mday = startDay;
-    this->timeStart->tm_mon = startMonth;
-    this->timeStart->tm_year = startYear;
-    this->timeStart->tm_hour = startHour;
-    this->timeStart->tm_min = startMinute;
-
-    if(timeStart->tm_mday + daysToStay > 31)
+    this->startDate = startDate;
+    char dateSeparator;
+    int day, month, year;
+    std::stringstream ss(startDate);
+    ss >> day >> dateSeparator >> month >> dateSeparator >> year;
+    day += daysToStay;
+    if(day > 31)
     {
-        timeEnd->tm_mday = timeStart->tm_mday + daysToStay - 31;
-        timeEnd->tm_mon++;
-        if(timeEnd->tm_mon > 12)
-            timeEnd->tm_year++;
-        timeEnd->tm_hour = startHour;
-        timeEnd->tm_min = startMinute;
+        day -= 31;
+        month++;
+        if(month > 12)
+        {
+            month -= 12;
+            year++;
+        }
     }
-
+    this->endDate = std::to_string(day) + dateSeparator + std::to_string(month) + dateSeparator + std::to_string(year); 
 }
 
-std::ostream& operator<<(std::ostream& os, const booking::BookingEntry& entry)
+void booking::emptyFileRoutine(std::fstream& file)
 {
-    // Push the entryID
-    os << entry.entryID << csvSeparator;
-
-    // Push the Customer components
-    os << '"' << "Name: " << entry.cust.name << newLineOp << "Address: "<< entry.cust.address << newLineOp << "Phone number: " << entry.cust.phoneNumber << '"' << csvSeparator;
-
-    // Push the Room components and handle the booleans
-    os << '"' << "Room number: "<<entry.room.roomNumber << newLineOp << "People number: " <<entry.room.peopleNumber << newLineOp << "Prefer AC: ";
-    if(entry.room.preferAC == true)
-        os << "Yes";
-    else os << "No";
-    os << newLineOp << "Price: " << entry.room.price <<'"' << csvSeparator;
-
-    // Push the PaymentStatus components and handle the booleans
-    os << '"' << "Fully paid: ";
-    if(entry.pay.fullyPaid == true)
-        os << "Yes";
-    else os << "No";
-    os << newLineOp << "Paid amount: " <<entry.pay.paidAmount << newLineOp << "Left amount: " <<entry.pay.leftAmount << '"' << csvSeparator;
-
-
-    os << '"';
-
-    // Check-in date & time 
-    os << "From: " << entry.period.timeStart->tm_mday << '/' << entry.period.timeStart->tm_mon << '/' << entry.period.timeStart->tm_year 
-    << ' ' << entry.period.timeStart->tm_hour << ':' << entry.period.timeStart->tm_min;
-
-    // Check-out date & time
-    os << newLineOp << "To: " << entry.period.timeEnd->tm_mday << '/' << entry.period.timeEnd->tm_mon << '/' << entry.period.timeEnd->tm_year << ' '
-    << entry.period.timeEnd->tm_hour << ':' << entry.period.timeEnd->tm_min;
-
-    os << '"' << csvSeparator << newLineOp;
-    return os;
-};
-
-void emptyFileRoutine(std::fstream& file)
-{
+    // Go to the end of the file
     file.seekg(0,std::ios::end);
+    
+    // If after reaching the end we are still at the position 0 in input sequence then do what needs to be done.
     if(file.tellg() == 0)
     {
-        file << "sep=" << csvSeparator << newLineOp;
-        file << "ID"  << csvSeparator << "Customer information" << csvSeparator << "Room details" << csvSeparator << "Payment status" << csvSeparator << "Time to stay" << newLineOp;
+        std::cout << "File is empty, information needs to be written into it. \n Writing the separator line and headers." << std::endl;
+        file << "sep=" << booking::csvSeparator << booking::newLineOp;
+        file << "ID"  << booking::csvSeparator << "Customer information" << booking::csvSeparator << "Room details" << booking::csvSeparator << "Payment status" << booking::csvSeparator << "Time to stay" << booking::newLineOp;
         std::ofstream idValue("../assets/currentID.txt");
         idValue << 1;
     }
 }
 
-void addBookingEntry()
+void booking::addBookingEntry()
 {
+    std::fstream paramFile("..\\assets\\bookings.csv",std::ios::app);
+    int entriesNumber;
     
+    int id = initID();
+
+    try
+    {
+        std::cout << "Please input how many entries you want to add: " << std::endl;
+        std::cin >> entriesNumber;
+        // This is used in order to remove the stray '\n' that is inserted after reading input and messes with the further input
+        std::cin.ignore(1,'\n');
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return;
+        clearScreen();
+        addBookingEntry();
+    }
+    
+    for(int i=0;i<entriesNumber;i++)
+    {
+        // Initialize objects
+        booking::Customer cust;
+        booking::Room room; 
+        booking::PaymentStatus pay;
+        booking::Period time;
+
+        std::cout << "Current entry: " << i+1 << std::endl;
+        std::cout << "Input the name, address and phone number of the customer number " << i+1 << std::endl;
+        std::vector<std::string> custAttrib;
+
+        // Do this for 3 strings
+        for(int j=0;j<3;j++)
+        {
+            std::string value;
+            std::getline(std::cin, value);
+            custAttrib.push_back(value);
+        }
+
+        cust = booking::Customer(custAttrib[0],custAttrib[1],custAttrib[2]);
+
+        // People
+        int people;
+        bool preferAC;
+        std::cout << "Input the number of people in the room. Inputs need to be numeric. " << std::endl;
+        std::cin >> people;
+
+        std::cout << "Input the preference for using the AC. Accepted inputs are 1 for \"true\" or 0 for \"false\"." << std::endl;
+        std::cin >> preferAC;
+        room = booking::Room(people,preferAC);
+
+        // Payment status
+        int price = room.price;
+        int paidAmount;
+        std::cout << "Please input the amount that the customer number " << i+1 << " has paid. Input needs to be numeric. " << std::endl;
+        std::cin >> paidAmount;
+
+        pay = booking::PaymentStatus(price, paidAmount);
+        
+        // Period
+        int startDay, startMonth, startYear, daysToStay;
+        std::string startingDate;
+        char dateSeparator; 
+        std::cout << "Input the starting date. The formats needs to be d/m/yyyy (example: 1/1/1970" << std::endl;
+        std::cin >> startingDate;
+
+
+        std::cout << "Input how many days does the client number " << i+1 << " want to stay." << std::endl;
+        std::cin >> daysToStay;
+        time = booking::Period(startingDate, daysToStay);
+
+        std::cin.ignore(1,'\n');
+        updateID();
+
+        paramFile << id << booking::csvSeparator;
+        paramFile << cust << room << pay << time << booking::newLineOp;
+
+        std::cout << "Entry number " << i+1 << " added" << std::endl;
+    }
+    paramFile.close();
+    std::cout << "All entries added" << std::endl;
 }
 
-void removeBookingEntry(std::fstream& file, int& lineToRemove)
+void booking::removeBookingEntry(std::fstream& file, int& lineToRemove)
 {
     std::string container;
     file.open("..\\assets\\bookings.csv", std::ios::app);
     
+}
+
+int booking::initID()
+{
+    int id;
+    std::ifstream file;
+    file.open("..\\assets\\currentID.txt");
+    file >> id;
+    file.close();
+    return id;
+}
+
+void booking::updateID()
+{
+    int id;
+    std::fstream oldFile("..\\assets\\currentID.txt", std::ios::in);
+    oldFile >> id;
+    oldFile.close();
+    id++;
+    std::fstream newFile("..\\assets\\currentID.txt",std::ios::out);
+    newFile << id;
+    newFile.close();
+}
+
+void clearScreen()
+{
+    std::cout << std::string(100,'\n');
 }
