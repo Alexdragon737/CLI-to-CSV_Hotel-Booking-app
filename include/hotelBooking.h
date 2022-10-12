@@ -101,7 +101,7 @@ namespace booking
     int initID();
     
     // Update the ID when necessary by rewriting the currentID.txt file.
-    void updateID();
+    void updateID(int& currentID);
     
 };
 

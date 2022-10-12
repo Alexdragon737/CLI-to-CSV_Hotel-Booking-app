@@ -198,12 +198,13 @@ void booking::addBookingEntry()
         time = booking::Period(startingDate, daysToStay);
 
         std::cin.ignore(1,'\n');
-        updateID();
 
         paramFile << id << booking::csvSeparator;
         paramFile << cust << room << pay << time << booking::newLineOp;
 
         std::cout << "Entry number " << i+1 << " added" << std::endl;
+        
+        updateID(id);
     }
     paramFile.close();
     std::cout << "All entries added" << std::endl;
@@ -226,15 +227,14 @@ int booking::initID()
     return id;
 }
 
-void booking::updateID()
+void booking::updateID(int& currentID)
 {
-    int id;
     std::fstream oldFile("..\\assets\\currentID.txt", std::ios::in);
-    oldFile >> id;
+    oldFile >> currentID;
     oldFile.close();
-    id++;
+    currentID++;
     std::fstream newFile("..\\assets\\currentID.txt",std::ios::out);
-    newFile << id;
+    newFile << currentID;
     newFile.close();
 }
 
