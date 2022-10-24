@@ -23,7 +23,7 @@ std::ostream& operator<<(std::ostream& os, const booking::PaymentStatus& pay)
     if(pay.fullyPaid == true)
         os << "Yes";
     else os << "No";
-    os << "Paid amount: " << pay.paidAmount << booking::newLineOp << "Left amount: " << pay.leftAmount << booking::newLineOp << '"' << booking::csvSeparator;
+    os << booking::newLineOp <<  "Paid amount: " << pay.paidAmount << booking::newLineOp << "Left amount: " << pay.leftAmount << booking::newLineOp << '"' << booking::csvSeparator;
     return os;
 }
 
@@ -189,7 +189,7 @@ void booking::addBookingEntry()
         int startDay, startMonth, startYear, daysToStay;
         std::string startingDate;
         char dateSeparator; 
-        std::cout << "Input the starting date. The formats needs to be d/m/yyyy (example: 1/1/1970" << std::endl;
+        std::cout << "Input the starting date. The formats needs to be d/m/yyyy (example: 1/1/1970)" << std::endl;
         std::cin >> startingDate;
 
 
@@ -210,11 +210,21 @@ void booking::addBookingEntry()
     std::cout << "All entries added" << std::endl;
 }
 
-void booking::removeBookingEntry(std::fstream& file, int& lineToRemove)
+void booking::removeBookingEntry(std::fstream& file, int& entryToRemove)
 {
     std::string container;
     file.open("..\\assets\\bookings.csv", std::ios::app);
-    
+    int currentLine = 0;
+    while(std::getline(file, container))
+    {
+        currentLine++;
+        if(currentLine == 2)
+            container = "";
+        if(currentLine > 2 && currentLine == entryToRemove + (entryToRemove-1)*10)
+        {
+            std::string line;
+        }
+    }
 }
 
 int booking::initID()

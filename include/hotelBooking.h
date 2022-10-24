@@ -36,8 +36,6 @@ namespace booking
              */
             Customer(std::string& name, std::string& address, std::string& phoneNumber);
 
-            // Operator<< overloading for Customer objects
-            friend std::ostream& operator<<(std::ostream& os, const booking::Customer& cust);
 
     };
 
@@ -62,8 +60,6 @@ namespace booking
              */
             Room(int& peopleNumber, bool& preferAC);
 
-            // Operator<< overloading for Room objects
-            friend std::ostream& operator<<(std::ostream& os, const booking::Room& room);
     };
 
     class PaymentStatus
@@ -80,8 +76,7 @@ namespace booking
 
             PaymentStatus(int& roomPrice, int& paidAmount);
 
-            // Operator<< overloading for PaymentStatus objects
-            friend std::ostream& operator<<(std::ostream& os, const booking::PaymentStatus& pay);
+            
     };
 
     class Period{
@@ -91,10 +86,8 @@ namespace booking
             Period();
 
             Period(std::string& startDate, int& daysToStay);
-
-            // Operator<< overloading for Period objects
-            friend std::ostream& operator<<(std::ostream& os, const booking::Period& period);
     };
+    
     /**
     * @brief Check if the file is empty. If true, then the separator line is appended to the file and reset the currentID.
     * 
@@ -106,24 +99,41 @@ namespace booking
     // Add one or more entries to the Bookings CSV file.
     void addBookingEntry();
     
-    // Remove one or more entries from the Bookings CSV file.
+    /**
+     * @brief Remove one specific entry from the file.
+     * 
+     * @param file The bookings file.
+     * @param lineToRemove The ID of the entry that needs to be removed.
+     */
     void removeBookingEntry(std::fstream& file, int& lineToRemove);
+
+    /**
+     * @brief Remove a specific number of entries from the file.
+     * 
+     * @param file The bookings file
+     * @param linesToRemove Vector of ints, with each element representing one ID of a line that needs to be removed.
+     */
+    void removeBookingEntry(std::fstream& file, std::vector<int> linesToRemove);
     
     // Explicitly initialize the ID by reading it from the currentID.txt file.
     int initID();
     
     // Update the ID when necessary by rewriting the currentID.txt file.
     void updateID(int& currentID);
-    
+
 };
 
+// Operator<< overloading for Customer objects
+std::ostream& operator<<(std::ostream& os, const booking::Customer& cust);
 
+// Operator<< overloading for Room objects
+std::ostream& operator<<(std::ostream& os, const booking::Room& room);
 
+// Operator<< overloading for PaymentStatus objects
+std::ostream& operator<<(std::ostream& os, const booking::PaymentStatus& pay);
 
-
-
-
-
+// Operator<< overloading for Period objects
+std::ostream& operator<<(std::ostream& os, const booking::Period& period);
 
 /*
     "Clear" the screen by inserting 100 lines of '\\n'.
